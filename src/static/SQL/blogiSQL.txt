@@ -1,0 +1,19 @@
+CREATE DATABASE blogi;
+
+CREATE TABLE kasutaja
+(
+  kasutaja_id serial NOT NULL,
+  kasutajanimi character varying(50),
+  parool character varying(75),
+  CONSTRAINT kasutaja_pk PRIMARY KEY (kasutaja_id ),
+  CONSTRAINT ak_kasutajanimi UNIQUE (kasutajanimi )
+)
+
+CREATE TABLE postitus
+(
+  postituse_number serial NOT NULL,
+  sisu text,
+  kuupaev timestamp with time zone DEFAULT now(),
+  pealkiri character varying(300),
+  CONSTRAINT pk_postitus PRIMARY KEY (postituse_number )
+)

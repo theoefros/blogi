@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+
+<project name="Blogi" default="all" basedir=".">
+      <property name="application_name" value="Blogi"/>
+	  <!-- Configure properties to access the Manager application -->
+	  <taskdef name="deploy"    classname="org.apache.catalina.ant.DeployTask"/>
+	  <taskdef name="undeploy"  classname="org.apache.catalina.ant.UndeployTask"/>
+	  <property name="path"     value="/${application_name}"/>
+
+
+
+
+   <!-- ================================================================== -->
+   <!-- Initialization of all property settings                            -->
+   <!-- ================================================================== -->
+
+   <target name="init">
+      <property environment="ENV"/>
+      <property name="src_all.dir"       value="src"              />
+      <property name="src_jsp.dir"       value="src/jsp"              />
+      <property name="src_static.dir"       value="src/static"              />
+      <property name="src_web_inf.dir"   value="src/WEB-INF"              />
+      <property name="src.dir"        value="src/theoefros/blogi"              />
+      <property name="prop.dir"       value="src/properties"              />
+      <property name="web-inf.dir"     value="WEB-INF"            />
+      <property name="classes.dir"     value="WEB-INF/classes"            />
+      <property name="jsp.dir"        value="."            />
+      <property name="build.dir"      value="build"            />
+      <property name="pkg-dist.name"  value="${name}-pkg" />
+	  <property name="tomcat.home" location="${ENV.TOMCAT_HOME}"/>
+ 	  <property name="tomcat.server.lib" location="${tomcat.home}/lib"/>
+      <property name="myapp.lib" location="lib"/>
+	   <path id="lib.classpath">
+       <fileset dir="${tomcat.server.lib}" includes="*.jar"/>
+	   <fileset dir="${ENV.ANT_HOME}/lib" includes="*.jar"/>
+	   <fileset dir="${myapp.lib}" includes="*.jar"/>
+      </path>
+  </target>
+
+
+   <!-- ================================================================== -->
+   <!-- Kustutab kompileeritud klassid                        -->
+   <!-- ================================================================== -->
+
+   <target name="clean" depends="init">
+      <delete dir="${classes.dir}" />
+      <delete dir="${web-inf.dir}" />
+   </target>
+
+
+
+   <!-- ================================================================== -->
+   <!-- Ettevalmistused                                                    -->
+   <!-- ================================================================== -->
+
+   <target name="prepare" depends="clean">
+      <mkdir dir="${classes.dir}" />
+   </target>
+
+
+   <!-- ========================================================================================================================= -->
+   <!-- Kompileerib ja asetab tulemuse vahekataloogi                                                                              -->
+   <!-- ========================================================================================================================= -->
+
+   <target name="compile" depends="prepare">
+      <javac srcdir="${src.dir}"
+             destdir="${classes.dir}"
+             classpathref="lib.classpath"/>
+       <copy todir="${classes.dir}">
+          <fileset dir="${prop.dir}" includes="**/*.properties" />
+       </copy>
+   </target>
+
+   <!-- ============================================================================================= -->
+   <!-- Deployment . Kopeerib kompileeritud klassid ja staatilised failid kokku yheks war-failiks     -->
+   <!-- ============================================================================================= -->
+
+
+
+<target name="war" depends="compile">
+<war destfile="${application_name}.war" webxml="${src_web_inf.dir}/web.xml">
+  <fileset dir="src/jsp"/>
+  <zipfileset dir="src/static" prefix="static"/>
+  <classes dir="${classes.dir}"/>
+  <lib dir="${myapp.lib}">
+  </lib>
+</war>
+</target>
+
+   <!-- ================================================================================= -->
+   <!-- Deployment . Kopeerib war-faili lokaalarvuti Tomcat-i /webapps kataloogi          -->
+   <!-- ================================================================================= -->
+   
+<target name="deploy_war_local" depends="war">
+     <copy todir="${tomcat.home}/webapps" overwrite="true">
+         <fileset dir="." includes="*.war" />
+      </copy>
+     <delete dir="${classes.dir}" />
+     <delete dir="${web-inf.dir}" />
+</target>
+
+<target name="all" depends="deploy_war_local">
+</target>
+
+
+
+</project>
